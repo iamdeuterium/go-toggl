@@ -5,17 +5,18 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"fmt"
 )
 
 type ApiClient struct {
-	httpClient *http.Client
-	apiToken string
+	httpClient	*http.Client
+	apiToken 	string
 
-	Users *UsersService
-	Projects *ProjectsService
-	Workspaces *WorkspacesService
-	Clients *ClientsService
-	Tags *TagsService
+	Users 		*UsersService
+	Projects 	*ProjectsService
+	Workspaces 	*WorkspacesService
+	Clients 	*ClientsService
+	Tags 		*TagsService
 }
 
 func NewClient(apiToken string, httpClient *http.Client) *ApiClient {
@@ -54,6 +55,9 @@ func (client *ApiClient) DoRequest(method string, url string, body interface{}, 
 	request := client.NewRequest(method, url, body)
 
 	resp, _ := client.httpClient.Do(request)
+
+	fmt.Println(request)
+	fmt.Println(resp)
 
 	decoder := json.NewDecoder(resp.Body)
 	decoder.Decode(responseStruct)
