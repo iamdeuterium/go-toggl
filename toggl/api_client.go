@@ -57,6 +57,10 @@ func (client *ApiClient) DoRequest(method string, url string, body interface{}, 
 
 	response, _ := client.httpClient.Do(request)
 
+	if response.StatusCode != 200 {
+		panic("Access denied. Check api token.")
+	}
+
 	decoder := json.NewDecoder(response.Body)
 	decoder.Decode(responseStruct)
 }

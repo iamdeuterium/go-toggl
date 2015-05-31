@@ -1,22 +1,25 @@
 package toggl
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type WorkspacesService struct {
 	client *ApiClient
 }
 
 type Workspace struct {
-	Id		uint	`json:"id"`
-	Name	string 	`json:"name"`
+	ID			uint		`json:"id"`
+	Name		string 		`json:"name"`
 }
 
 type WorkspaceResponse struct {
-	Workspace Workspace `json:"data"`
+	Workspace	Workspace 	`json:"data"`
 }
 
 type WorkspaceRequest struct {
-	Workspace Workspace `json:"workspace"`
+	Workspace 	Workspace 	`json:"workspace"`
 }
 
 func (service *WorkspacesService) All() *[]Workspace {
@@ -35,17 +38,31 @@ func (service *WorkspacesService) GetByID(id uint) Workspace {
 	return response.Workspace
 }
 
+func (service *WorkspacesService) GetByName(name string) (Workspace, bool) {
+	workspaces := service.All()
+
+	for i := 0; i < len(*workspaces); i++ {
+		workspace := (*workspaces)[i]
+
+		if strings.HasPrefix(strings.ToLower(workspace.Name), strings.ToLower(name)) {
+			return workspace, true
+		}
+	}
+
+	return Workspace{}, false
+}
+
 func (service *WorkspacesService) Update(workspace Workspace) Workspace {
 	request := WorkspaceRequest{Workspace: workspace}
 	response := new(WorkspaceResponse)
 
-	service.client.DoRequest("PUT", fmt.Sprintf("/workspaces/%d", workspace.Id), request, response)
+	service.client.DoRequest("PUT", fmt.Sprintf("/workspaces/%d", workspace.ID), request, response)
 
 	return response.Workspace
 }
 
 func (service *WorkspacesService) GetUsersByWorkspace(workspace Workspace) *[]User {
-	return service.GetUsersByWorkspaceId(workspace.Id)
+	return service.GetUsersByWorkspaceId(workspace.ID)
 }
 
 func (service *WorkspacesService) GetUsersByWorkspaceId(id uint) *[]User {
@@ -57,7 +74,7 @@ func (service *WorkspacesService) GetUsersByWorkspaceId(id uint) *[]User {
 }
 
 func (service *WorkspacesService) GetClientsByWorkspace(workspace Workspace) *[]Client {
-	return service.GetClientsByWorkspaceId(workspace.Id)
+	return service.GetClientsByWorkspaceId(workspace.ID)
 }
 
 func (service *WorkspacesService) GetClientsByWorkspaceId(id uint) *[]Client {
@@ -69,7 +86,7 @@ func (service *WorkspacesService) GetClientsByWorkspaceId(id uint) *[]Client {
 }
 
 func (service *WorkspacesService) GetProjectsByWorkspace(workspace Workspace) *[]Project {
-	return service.GetProjectsByWorkspaceId(workspace.Id)
+	return service.GetProjectsByWorkspaceId(workspace.ID)
 }
 
 func (service *WorkspacesService) GetProjectsByWorkspaceId(id uint) *[]Project {
@@ -81,7 +98,7 @@ func (service *WorkspacesService) GetProjectsByWorkspaceId(id uint) *[]Project {
 }
 
 func (service *WorkspacesService) GetTagsByWorkspace(workspace Workspace) *[]Tag {
-	return service.GetTagsByWorkspaceId(workspace.Id)
+	return service.GetTagsByWorkspaceId(workspace.ID)
 }
 
 func (service *WorkspacesService) GetTagsByWorkspaceId(id uint) *[]Tag {

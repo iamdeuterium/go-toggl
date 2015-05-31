@@ -3,6 +3,7 @@ package toggl
 import (
 	"fmt"
 	"time"
+	"sort"
 )
 
 type TimeEntriesService struct {
@@ -21,6 +22,10 @@ type TimeEntry struct {
 	CreatedWith		string     	`json:"created_with"`
 }
 
+func (timeEntry *TimeEntry) IsPersisted() bool {
+	return timeEntry.ID > 0
+}
+
 type TimeEntryRequest struct {
 	TimeEntry		TimeEntry	`json:"time_entry"`
 }
@@ -29,10 +34,17 @@ type TimeEntryResponse struct {
 	TimeEntry		TimeEntry	`json:"data"`
 }
 
+type byStopTime []TimeEntry
+func (v byStopTime) Len() int { return len(v) }
+func (v byStopTime) Swap(i, j int) { v[i], v[j] = v[j], v[i] }
+func (v byStopTime) Less(i, j int) bool { return v[i].Stop.Unix() > v[j].Stop.Unix() }
+
 func (service *TimeEntriesService) All() *[]TimeEntry {
 	entries := new([]TimeEntry)
 
 	service.client.DoRequest("GET", "/time_entries", nil, entries)
+
+	sort.Sort(byStopTime(*entries))
 
 	return entries
 }
@@ -75,7 +87,15 @@ func (service *TimeEntriesService) Update(timeEntry TimeEntry) TimeEntry {
 	return response.TimeEntry
 }
 
+func (service *TimeEntriesService) Delete(timeEntry TimeEntry) {
+	request	:= TimeEntryRequest{TimeEntry: timeEntry}
+
+	service.client.DoRequest("DELETE", fmt.Sprintf("/time_entries/%d", timeEntry.ID), request, nil)
+}
+
 func (service *TimeEntriesService) Start(timeEntry TimeEntry) TimeEntry {
+	timeEntry.Stop = time.Time{}
+
 	if len(timeEntry.CreatedWith) == 0 {
 		timeEntry.CreatedWith = "go-toggl client"
 	}

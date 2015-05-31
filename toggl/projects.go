@@ -2,6 +2,7 @@ package toggl
 
 import (
 	"fmt"
+	"strings"
 )
 
 type ProjectsService struct {
@@ -29,6 +30,20 @@ func (service *ProjectsService) GetByID(id uint) Project {
 	service.client.DoRequest("GET", fmt.Sprintf("/projects/%d", id), nil, response)
 
 	return response.Project
+}
+
+func (service *ProjectsService) GetByName(name string, workspaceID uint) (Project, bool) {
+	projects := service.client.Workspaces.GetProjectsByWorkspaceId(workspaceID)
+
+	for i := 0; i < len(*projects); i++ {
+		project := (*projects)[i]
+
+		if strings.HasPrefix(strings.ToLower(project.Name), strings.ToLower(name)) {
+			return project, true
+		}
+	}
+
+	return Project{}, false
 }
 
 func (service *ProjectsService) Create(project Project) Project {

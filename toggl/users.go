@@ -9,7 +9,7 @@ type User struct {
 	Email 		string 		`json:"email"`
 	ApiToken	string		`json:"api_token"`
 
-	DefaultWorkspaceID uint `json:"wid"`
+	DefaultWorkspaceID uint `json:"default_wid"`
 	Workspaces	[]Workspace
 }
 
