@@ -62,7 +62,6 @@ func (service *ClientsService) Delete(client Client) {
 	service.client.DoRequest("DELETE", fmt.Sprintf("/clients/%d", client.ID), request, nil)
 }
 
-
 func (service *ClientsService) GetProjectsByClient(client Client) *[]Project {
 	return service.GetProjectsByClientId(client.ID)
 }

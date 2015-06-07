@@ -38,12 +38,28 @@ func (service *ProjectsService) GetByName(name string, workspaceID uint) (Projec
 	for i := 0; i < len(*projects); i++ {
 		project := (*projects)[i]
 
-		if strings.HasPrefix(strings.ToLower(project.Name), strings.ToLower(name)) {
+		if project.Name == name {
 			return project, true
 		}
 	}
 
 	return Project{}, false
+}
+
+func (service *ProjectsService) GetByNamePrefix(name string, workspaceID uint) ([]Project, bool) {
+	projects := service.client.Workspaces.GetProjectsByWorkspaceId(workspaceID)
+
+	result := []Project{}
+
+	for i := 0; i < len(*projects); i++ {
+		project := (*projects)[i]
+
+		if strings.HasPrefix(strings.ToLower(project.Name), strings.ToLower(name)) {
+			result = append(result, project)
+		}
+	}
+
+	return result, false
 }
 
 func (service *ProjectsService) Create(project Project) Project {
